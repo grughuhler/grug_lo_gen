@@ -1,11 +1,23 @@
 Quisk is cool but is a bit of a beast, and I don't understand it well.
 
 I started by using quisk's config GUI (the config buttom) to create a
-"fixed" radio that I called "tayloe_fixed" and pointed the GUI at this
-file.  You just have to fiddle with the quisk GUI until you figure it
-out.
+"fixed" radio that I called "tayloe_fixed".
 
-You must edit this file to select your serial port.
+Then, I used the config GUI to associated the python file in this
+directory with "tayloe_fixed".  You just have to fiddle with the quisk
+GUI until you figure it out.  You also need to use the "Sound" subtab
+under "*tayloe_fixed*" to set your sound card's sample rate. On the
+same subtab you select the sound device.
+
+For Linux, I set the sound device to "pulse" and then used PulseAudio
+Volume Control to set the input device to "Built-in Audio Analog
+Stereo".
+
+Quisk also works on Windows.  There, I set Radio Sound Output to
+"Primary" and I/Q Rx Sample Input to "Line In".
+
+You must edit this python file to select your serial port.  If the
+serial port is not found, quisk will crash.
 
 Also, it does not work right at startup.  You have to tune something
 first, e.g. by entering a frequency in Hz into the tuning box in the

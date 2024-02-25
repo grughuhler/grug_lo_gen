@@ -1,0 +1,19 @@
+Quisk is cool but is a bit of a beast, and I don't understand it well.
+
+I started by using quisk's config GUI (the config buttom) to create a
+"fixed" radio that I called "tayloe_fixed" and pointed the GUI at this
+file.  You just have to fiddle with the quisk GUI until you figure it
+out.
+
+You must edit this file to select your serial port.
+
+Also, it does not work right at startup.  You have to tune something
+first, e.g. by entering a frequency in Hz into the tuning box in the
+GUI.  Then, all is well.
+
+You could also use gqrx instead of quisk, gqrx is usually excellent,
+but when reading from a sound card, it does not appear to correctly
+process IQ data.  Quisk does and so does gnuradio, so I did not
+further investigate.
+
+Strong local medium wave AM stations are the easiest to receive.

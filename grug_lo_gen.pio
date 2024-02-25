@@ -1,0 +1,84 @@
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+.program grug_lo_gen
+
+; The 4 set instructions loop forever, each set sets two output
+; pins and takes exactly one PIO clock.  So, the LO frequency
+; is (PIO clock)/4.
+
+.wrap_target
+    set pins, 0b00
+    set pins, 0b10
+    set pins, 0b11
+    set pins, 0b01
+.wrap
+
+
+% c-sdk {
+static pio_sm_config c;
+
+void find_clkdiv_from_float(float div, uint16_t *div_int, uint8_t *div_frac)
+{
+  float frac;
+
+  *div_int = (uint16_t)div;
+  if (*div_int == 0) {
+    *div_frac = 0;
+  } else {
+    frac = 256.0*(div - (float)*div_int);
+    *div_frac = round(frac);
+    if (*div_frac >= 256) *div_frac = 255;
+  }
+}
+
+
+// This function attempts to set PIO clock speed to freq, returning
+// the actual freqeuncy achieved in actual.  You can call it while
+// the PIO program is running.
+//
+void grug_lo_gen_set_freq(PIO pio, uint sm, float freq, float *actual)
+{
+    float sys_clk;
+    float div;
+    uint16_t div_int;
+    uint8_t div_frac;
+
+    sys_clk = clock_get_hz(clk_sys);
+    div = sys_clk/freq;
+    
+    find_clkdiv_from_float(div, &div_int, &div_frac);
+    pio_sm_set_clkdiv_int_frac(pio, sm, div_int, div_frac);
+    *actual = sys_clk/(div_int + div_frac/256.0);
+}
+
+static inline void grug_lo_gen_program_init(PIO pio, uint sm, uint offset,
+                                            uint pin)
+{
+    c = grug_lo_gen_program_get_default_config(offset);
+
+    // Set pins to be part of set output group, i.e. set by set instruction
+    sm_config_set_set_pins(&c, pin, 2);
+
+    // Attach pio to the GPIO
+    pio_gpio_init(pio, pin);
+    pio_gpio_init(pio, pin+1);
+
+    // Set pins direction to output at the PIO
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 2, true);
+
+    // Some initial PIO frequency that is not used for long
+    float div = clock_get_hz(clk_sys) / 10000000.0;
+    sm_config_set_clkdiv(&c, div);
+
+    // Set sticky-- continue to drive value from last set/out.  Other stuff off.
+    sm_config_set_out_special(&c, true, false, false);
+
+    // Load configuration, and jump to the start of the program
+    pio_sm_init(pio, sm, offset, &c);
+    
+    // enable this pio state machine
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

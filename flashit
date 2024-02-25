@@ -1,0 +1,2 @@
+#!/bin/sh
+sudo ../../../picotool/build/picotool load grug_lo_gen_pio.uf2 -f
